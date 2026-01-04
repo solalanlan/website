@@ -47,8 +47,7 @@
             const result = document.getElementById('result');
 
             function pickFortune(){
-                // 重み付けの例（大吉は少なめ）
-                const weights = [5,12,18,25,18,14,8];
+                const weights = [1,1,1,1,1,1,1];
                 const total = weights.reduce((a,b)=>a+b,0);
                 let r = Math.floor(Math.random()*total);
                 for(let i=0;i<weights.length;i++){
