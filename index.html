@@ -1,6 +1,89 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>おみくじ</title>
+    <style>
+        body{font-family:Helvetica,Arial,'メイリオ',sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:linear-gradient(180deg,#fff,#f7f4ff)}
+        .card{background:#fff;border-radius:12px;box-shadow:0 6px 24px rgba(60,30,80,0.12);padding:28px;max-width:420px;width:92%;text-align:center}
+        h1{margin:0 0 12px;color:#3f2b6b}
+        p.lead{color:#6b5fa3;margin:0 0 18px}
+        button#omikujiBtn{background:#6b5fa3;color:#fff;border:none;padding:12px 18px;border-radius:8px;font-size:16px;cursor:pointer;box-shadow:0 6px 14px rgba(107,95,163,0.28)}
+        button#omikujiBtn:active{transform:translateY(2px)}
+        .result{margin-top:18px;font-size:20px;min-height:56px;display:flex;align-items:center;justify-content:center;border-radius:8px}
+        .big{font-weight:700;font-size:28px}
+        .daikichi{color:#0a9e5a}
+        .kichi{color:#1e90ff}
+        .suekichi{color:#9a6b00}
+        .kyou{color:#d9534f}
+        .animate{animation:pop 700ms ease forwards}
+        @keyframes pop{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.08);opacity:1}100%{transform:scale(1)}}
+        footer{margin-top:14px;font-size:12px;color:#9b94b8}
+    </style>
+</head>
 <body>
-    <h1><div style="color: #ff3700;">Welcome to My Website</div></h1>
-    <p>This is a sample paragraph to demonstrate the structure of an HTML document.</p>
-    <p>テクノロジーに希望をのせて</p>
-    <p><a target="_blank" href="https://www.pokemon-card.com/">ポケモンカードゲーム</a></p>
+    <div class="card">
+        <h1>おみくじ</h1>
+        <p class="lead">ボタンを押して運勢を占いましょう。</p>
+        <button id="omikujiBtn">おみくじを引く</button>
+        <div id="result" class="result" aria-live="polite"></div>
+        <footer>おみくじの結果はランダムです。もう一度引くにはボタンを押してください。</footer>
+    </div>
+
+    <script>
+        (function(){
+            const fortunes = [
+                {text:'大吉',class:'daikichi'},
+                {text:'中吉',class:'kichi'},
+                {text:'小吉',class:'suekichi'},
+                {text:'吉',class:'kichi'},
+                {text:'末吉',class:'suekichi'},
+                {text:'凶',class:'kyou'},
+                {text:'大凶',class:'kyou'}
+            ];
+
+            const btn = document.getElementById('omikujiBtn');
+            const result = document.getElementById('result');
+
+            function pickFortune(){
+                // 重み付けの例（大吉は少なめ）
+                const weights = [5,12,18,25,18,14,8];
+                const total = weights.reduce((a,b)=>a+b,0);
+                let r = Math.floor(Math.random()*total);
+                for(let i=0;i<weights.length;i++){
+                    r -= weights[i];
+                    if(r<0) return fortunes[i];
+                }
+                return fortunes[0];
+            }
+
+            function showTemporary(text,cls){
+                result.className = 'result animate ' + cls;
+                result.innerHTML = '<span class="big">' + text + '</span>';
+                // アニメーション終了後クラスを残すため一度だけタイマーでクリア
+                setTimeout(()=>{ result.classList.remove('animate'); }, 800);
+            }
+
+            btn.addEventListener('click', ()=>{
+                btn.disabled = true;
+                btn.textContent = '占っています…';
+                // ランダムの演出
+                let count = 0;
+                const spin = setInterval(()=>{
+                    const f = fortunes[Math.floor(Math.random()*fortunes.length)];
+                    showTemporary(f.text, f.class);
+                    count++;
+                    if(count>10){
+                        clearInterval(spin);
+                        const finalF = pickFortune();
+                        showTemporary(finalF.text, finalF.class);
+                        btn.disabled = false;
+                        btn.textContent = 'おみくじを引く';
+                    }
+                },80);
+            });
+        })();
+    </script>
 </body>
+</html>
